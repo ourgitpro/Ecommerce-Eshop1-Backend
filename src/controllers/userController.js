@@ -1,5 +1,6 @@
 const createError = require("http-errors");
 const User = require("../models/userModel");
+const {successResponse}=require("./responseController")
 const getUsers = async (req, res, next) => {
   try {
     const search = req.query.search || "";
@@ -20,7 +21,7 @@ const getUsers = async (req, res, next) => {
       .skip((page - 1) * limit);
     const count = await User.find(filter).countDocuments();
     if (!users) throw createError(404, "no user found");
-    res.status(200).send({
+   /* res.status(200).send({
       message: "user profile is return",
       users,
       pagination: {
@@ -29,7 +30,20 @@ const getUsers = async (req, res, next) => {
         previousPage: page - 1 > 0 ? page - 1 : null,
         nextPage: page + 1 <= Math.ceil(count / limit) ? page + 1 : null,
       },
-    });
+    });*/
+    return successResponse(res,{
+      statusCode:200,
+      message:"user profile is return successfully by Nahid",
+      payload:{
+        users,
+      pagination: {
+        totalPages: Math.ceil(count / limit),
+        currentPage: page,
+        previousPage: page - 1 > 0 ? page - 1 : null,
+        nextPage: page + 1 <= Math.ceil(count / limit) ? page + 1 : null,
+      },
+      }
+    })
   } catch (error) {
     next(error);
   }
