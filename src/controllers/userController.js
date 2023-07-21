@@ -1,10 +1,13 @@
 const createError = require("http-errors");
+const { jwtActivationKey } = require("../secret");
 const fs = require("fs");
 const path = require("path");
 const { promisify } = require("util");
 const User = require("../models/userModel");
 const { successResponse } = require("./responseController");
 const { findWithId } = require("../services/findItem");
+const { createJSONWebToken } = require("../helper/jsonwebtoken");
+
 const getUsers = async (req, res, next) => {
   try {
     const search = req.query.search || "";
@@ -130,8 +133,40 @@ const deleteUser = async (req, res, next) => {
     next(error);
   }
 };
-
-module.exports = { getUsers, getUser, deleteUser };
+const processRegister = async (req, res, next) => {
+  try {
+    const { name, email, password, phone, address } = req.body;
+    const userExists = await User.exists({ email: email });
+    if (userExists) {
+      throw createError(409, "This user email already exists");
+    }
+    //create jwt token
+    const token = createJSONWebToken(
+      { name, email, password, phone, address },
+      jwtActivationKey,
+      "10m"
+    );
+    //prepare email
+    //email send with nodemailer
+    /* const newUser = {
+      name,
+      email,
+      password,
+      phone,
+      address,
+    };*/
+    return successResponse(res, {
+      statusCode: 200,
+      message: "user profile is  successfully by Nahid",
+      payload: {
+        token,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+module.exports = { getUsers, getUser, deleteUser, processRegister };
 /*
 const deleteUser = async (req, res, next) => {
   try {
