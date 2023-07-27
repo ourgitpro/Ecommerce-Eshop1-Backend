@@ -4,10 +4,14 @@ const mongodbUrl = process.env.MONGODB_URL;
 const jwtActivationKey = process.env.JWT_ACTIVATION_KEY || "yyyuyuyfudddyu";
 const smtpUsername = process.env.SMPT_MAIL;
 const smtpPassword = process.env.SMPT_PASSWORD;
+const clientURL = process.env.CLIENT_URL
+const uploadDir= process.env.UPLOAD_FILE
 module.exports = {
   serverPort,
   mongodbUrl,
   jwtActivationKey,
   smtpUsername,
   smtpPassword,
+  clientURL,
+  uploadDir
 };

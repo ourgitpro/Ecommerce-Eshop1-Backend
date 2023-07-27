@@ -1,13 +1,16 @@
 const createError = require("http-errors");
-const { jwtActivationKey } = require("../secret");
+const { jwtActivationKey, clientURL } = require("../secret");
+
 const fs = require("fs");
 const path = require("path");
+
 const { promisify } = require("util");
 const User = require("../models/userModel");
 const { successResponse } = require("./responseController");
 const { findWithId } = require("../services/findItem");
 const { createJSONWebToken } = require("../helper/jsonwebtoken");
-
+const emailWithNodeMaier = require("../helper/email");
+const jwt = require("jsonwebtoken");
 const getUsers = async (req, res, next) => {
   try {
     const search = req.query.search || "";
@@ -100,8 +103,8 @@ const getUser = async (req, res, next) => {
     next(error);
   }
 };*/
-const unlinkAsync = promisify(fs.unlink);
-const deleteUser = async (req, res, next) => {
+//const unlinkAsync = promisify(fs.unlink);
+/*const deleteUser = async (req, res, next) => {
   try {
     const id = req.params.id;
     const options = { password: 0 };
@@ -132,29 +135,71 @@ const deleteUser = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};*/
+const deleteUser = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const options = { password: 0 };
+    const user = await findWithId(User, id, options);
+
+    console.log("User object:", user);
+
+    if (user.image) {
+      // Clear the image buffer from the user document
+      user.image = null;
+      await user.save();
+    } else {
+      console.log("User does not have an image.");
+    }
+    await User.findByIdAndDelete(id);
+    return successResponse(res, {
+      statusCode: 200,
+      message: "User deleted successfully by Nahid",
+    });
+  } catch (error) {
+    next(error);
+  }
 };
+
 const processRegister = async (req, res, next) => {
   try {
     const { name, email, password, phone, address } = req.body;
+    if (!req.file) {
+    }
+    const imageBufferString = req.file.buffer.toString("base64");
+
+    //console.log(imageBufferString);
+    // Get the file path of the uploaded image
+    //const imagePath = req.file ? req.file.path : null;
     const userExists = await User.exists({ email: email });
     if (userExists) {
       throw createError(409, "This user email already exists");
     }
     //create jwt token
     const token = createJSONWebToken(
-      { name, email, password, phone, address },
+      { name, email, password, phone, address, image: imageBufferString },
       jwtActivationKey,
       "10m"
     );
     //prepare email
-    //email send with nodemailer
-    /* const newUser = {
-      name,
+    const emailData = {
       email,
-      password,
-      phone,
-      address,
-    };*/
+      subject: "Account Activation Mail",
+      html: `
+        <h2>Hello ${name}</h2>
+        <p>please click here to <a href="${clientURL}/api/users/activate/${token}" target="_blank">Activate Here</a> </p>
+        
+      `,
+    };
+
+    //email send with nodemailer
+    try {
+      await emailWithNodeMaier(emailData);
+    } catch (error) {
+      console.error("error sending mail:", error);
+      throw error;
+    }
+
     return successResponse(res, {
       statusCode: 200,
       message: "user profile is  successfully by Nahid",
@@ -166,7 +211,68 @@ const processRegister = async (req, res, next) => {
     next(error);
   }
 };
-module.exports = { getUsers, getUser, deleteUser, processRegister };
+const updateUserById = async (req, res, next) => {
+  try {
+    const userId = req.params.id;
+    const updateOptions = { new: true, runValidators: true, context: "query" };
+    let updates = {};
+    if (req.body.name) {
+      updates.name = req.body.name;
+    }
+    if (req.body.password) {
+      updates.password = req.body.password;
+    }
+    if (req.body.phone) {
+      updates.phone = req.body.phone;
+    }
+    if (req.body.address) {
+      updates.address = req.body.address;
+    }
+
+    const image = req.file;
+    if (image) {
+      if (image.size > 1024 * 1024 * 2) {
+        throw createError(404, "File too large. It must be 2 MB or smaller.");
+      }
+      updates.image = image.buffer.toString("base64");
+    }
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      updates,
+      updateOptions
+    );
+    return successResponse(res, {
+      statusCode: 200,
+      message: "User update successfully by Nahid",
+      payload: updatedUser,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+const activateUserAccount = async (req, res, next) => {
+  try {
+    const token = req.body.token;
+    if (!token) throw createError(404, "Token not found");
+    const decoded = jwt.verify(token, jwtActivationKey);
+
+    await User.create(decoded);
+    return successResponse(res, {
+      statusCode: 201,
+      message: "User  successfully register by Nahid",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+module.exports = {
+  getUsers,
+  getUser,
+  deleteUser,
+  processRegister,
+  activateUserAccount,
+  updateUserById,
+};
 /*
 const deleteUser = async (req, res, next) => {
   try {
