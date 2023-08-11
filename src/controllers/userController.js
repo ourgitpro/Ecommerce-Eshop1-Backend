@@ -265,6 +265,31 @@ const activateUserAccount = async (req, res, next) => {
     next(error);
   }
 };
+const handleBanUserById = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+
+    await findWithId(User, id);
+    const updates = { isBanned: true };
+    const updateOptions = { new: true, runValidators: true, context: "query" };
+    
+
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      updates,
+      updateOptions
+    );
+    if (!updatedUser) {
+      throw createError(404, "user not banned successfully");
+    }
+    return successResponse(res, {
+      statusCode: 200,
+      message: "User banned successfully by Nahid",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 module.exports = {
   getUsers,
   getUser,
@@ -272,6 +297,7 @@ module.exports = {
   processRegister,
   activateUserAccount,
   updateUserById,
+  handleBanUserById,
 };
 /*
 const deleteUser = async (req, res, next) => {

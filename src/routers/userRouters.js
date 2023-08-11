@@ -29,25 +29,29 @@ const {
   deleteUser,
   processRegister,
   activateUserAccount,
-  updateUserById
+  updateUserById,
+  handleBanUserById,
 } = require("../controllers/userController");
+const cookieParser = require("cookie-parser");
 const { validateUserRegistration } = require("../validators/auth");
 const { runValidation } = require("../validators/index.js");
 const upload = require("../middlewares/uploadFile");
+const { isLoggedIn, isLoggOut, isAdmin } = require("../middlewares/auth");
 const userRouter = express.Router();
-
+userRouter.use(cookieParser());
 userRouter.post(
   "/process-register",
 
   upload.single("image"),
+  isLoggOut,
   validateUserRegistration,
   runValidation,
   processRegister
 );
-userRouter.post("/verify", activateUserAccount);
-userRouter.get("/", getUsers);
-userRouter.get("/:id", getUser);
-userRouter.delete("/:id", deleteUser);
-userRouter.put("/:id",upload.single("image"), updateUserById);
-
+userRouter.post("/verify", isLoggOut, activateUserAccount);
+userRouter.get("/", isLoggedIn, isAdmin, getUsers);
+userRouter.get("/:id", isLoggedIn, getUser);
+userRouter.delete("/:id", isLoggedIn, deleteUser);
+userRouter.put("/:id", upload.single("image"), isLoggedIn, updateUserById);
+userRouter.put("/ban-user/:id", isLoggedIn, isAdmin,  handleBanUserById);
 module.exports = userRouter;
