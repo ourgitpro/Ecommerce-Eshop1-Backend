@@ -1,6 +1,6 @@
 const { Schema, model } = require("mongoose");
 const bcrypt = require("bcryptjs");
-const userSchema = new Schema(
+const userSchema  = new Schema(
   {
     name: {
       type: String,
@@ -66,5 +66,5 @@ const userSchema = new Schema(
   },
   { timestamps: true }
 );
-const User = model("Users", userSchema);
+const User = model("Users", userSchema );
 module.exports = User;

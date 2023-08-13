@@ -33,7 +33,8 @@ const {
   handleBanUserById,
   handleUpdatePasswordById,
   handleForgetPassword,
-  handleResetPassword
+  handleResetPassword,
+  handleUnBanUserById
 } = require("../controllers/userController");
 const cookieParser = require("cookie-parser");
 const { validateUserRegistration } = require("../validators/auth");
@@ -57,6 +58,7 @@ userRouter.get("/:id", isLoggedIn, getUser);
 userRouter.delete("/:id", isLoggedIn, deleteUser);
 userRouter.put("/:id", upload.single("image"), isLoggedIn, updateUserById);
 userRouter.put("/ban-user/:id", isLoggedIn, isAdmin, handleBanUserById);
+userRouter.put("/unban-user/:id", isLoggedIn, isAdmin,  handleUnBanUserById);
 userRouter.put("/update-password/:id", isLoggedIn, handleUpdatePasswordById);
 userRouter.post("/forget-password/:id", handleForgetPassword );
 userRouter.put("/reset-password/:id",   handleResetPassword );

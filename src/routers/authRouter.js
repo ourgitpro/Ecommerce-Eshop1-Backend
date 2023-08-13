@@ -4,6 +4,8 @@ const { runValidation } = require("../validators/index.js");
 const {
   handlelogging,
   handleLogOut,
+  handleRefreshToken,
+  handleProtected
 } = require("../controllers/authController.js");
 const { isLoggedIn ,isLoggOut} = require("../middlewares/auth");
 const authRouter = express.Router();
@@ -14,5 +16,7 @@ authRouter.use(cookieParser()); // Use cookie-parser middleware
 
 authRouter.post("/login",isLoggOut,handlelogging);
 authRouter.post("/logout",isLoggedIn, handleLogOut);
+authRouter.get("/refresh-token",  handleRefreshToken);
+authRouter.get("/protected",  handleProtected);
 
 module.exports = authRouter;

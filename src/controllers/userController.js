@@ -290,6 +290,30 @@ const handleBanUserById = async (req, res, next) => {
     next(error);
   }
 };
+const handleUnBanUserById = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+
+    await findWithId(User, id);
+    const updates = { isBanned: false };
+    const updateOptions = { new: true, runValidators: true, context: "query" };
+
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      updates,
+      updateOptions
+    );
+    if (!updatedUser) {
+      throw createError(404, "user not banned successfully");
+    }
+    return successResponse(res, {
+      statusCode: 200,
+      message: "User un-banned successfully by Nahid",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 const handleUpdatePasswordById = async (req, res, next) => {
   try {
     const { email, oldPassword, newPassword, confirmedPassword } = req.body;
@@ -397,6 +421,7 @@ module.exports = {
   handleUpdatePasswordById,
   handleForgetPassword,
   handleResetPassword,
+  handleUnBanUserById
 };
 /*
 const deleteUser = async (req, res, next) => {
