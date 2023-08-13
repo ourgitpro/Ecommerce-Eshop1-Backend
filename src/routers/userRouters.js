@@ -31,6 +31,9 @@ const {
   activateUserAccount,
   updateUserById,
   handleBanUserById,
+  handleUpdatePasswordById,
+  handleForgetPassword,
+  handleResetPassword
 } = require("../controllers/userController");
 const cookieParser = require("cookie-parser");
 const { validateUserRegistration } = require("../validators/auth");
@@ -53,5 +56,8 @@ userRouter.get("/", isLoggedIn, isAdmin, getUsers);
 userRouter.get("/:id", isLoggedIn, getUser);
 userRouter.delete("/:id", isLoggedIn, deleteUser);
 userRouter.put("/:id", upload.single("image"), isLoggedIn, updateUserById);
-userRouter.put("/ban-user/:id", isLoggedIn, isAdmin,  handleBanUserById);
+userRouter.put("/ban-user/:id", isLoggedIn, isAdmin, handleBanUserById);
+userRouter.put("/update-password/:id", isLoggedIn, handleUpdatePasswordById);
+userRouter.post("/forget-password/:id", handleForgetPassword );
+userRouter.put("/reset-password/:id",   handleResetPassword );
 module.exports = userRouter;

@@ -32,6 +32,14 @@ const handlelogging = async (req, res, next) => {
       secure: true,
       sameSite: "none",
     });
+    //create jwt token
+    const refreshToken = createJSONWebToken({ email }, jwtAccessKey, "7d");
+    res.cookie("refreshToken ", refreshToken, {
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
     return successResponse(res, {
       statusCode: 200,
       message: "user profile is return successfully by Nahid",

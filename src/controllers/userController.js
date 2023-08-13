@@ -1,5 +1,5 @@
 const createError = require("http-errors");
-const { jwtActivationKey, clientURL } = require("../secret");
+const { jwtActivationKey, clientURL, jwtResetKey } = require("../secret");
 
 const fs = require("fs");
 const path = require("path");
@@ -11,6 +11,7 @@ const { findWithId } = require("../services/findItem");
 const { createJSONWebToken } = require("../helper/jsonwebtoken");
 const emailWithNodeMaier = require("../helper/email");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 const getUsers = async (req, res, next) => {
   try {
     const search = req.query.search || "";
@@ -272,7 +273,6 @@ const handleBanUserById = async (req, res, next) => {
     await findWithId(User, id);
     const updates = { isBanned: true };
     const updateOptions = { new: true, runValidators: true, context: "query" };
-    
 
     const updatedUser = await User.findByIdAndUpdate(
       id,
@@ -290,6 +290,102 @@ const handleBanUserById = async (req, res, next) => {
     next(error);
   }
 };
+const handleUpdatePasswordById = async (req, res, next) => {
+  try {
+    const { email, oldPassword, newPassword, confirmedPassword } = req.body;
+    const userId = req.params.id;
+    const user = await findWithId(User, userId);
+    //compare the password
+    const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isPasswordMatch) {
+      throw createError(404, "OldPassword did not match ");
+    }
+    const filter = { userId };
+    const updates = { $set: { password: newPassword } };
+    const updateOptions = { new: true };
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      updates,
+      updateOptions
+    );
+    if (!updatedUser) {
+      throw createError(404, "user password not update successfully");
+    }
+    return successResponse(res, {
+      statusCode: 200,
+      message: "User password update successfully by Nahid",
+      payload: { updatedUser },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+const handleForgetPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const userData = await User.findOne({ email: email });
+    if (!userData) {
+      throw createError(404, "User not found");
+    }
+    const token = createJSONWebToken({ email }, jwtResetKey, "10m");
+    //prepare email
+    const emailData = {
+      email,
+      subject: "Reset Password Email",
+      html: `
+      <h2>Hello ${userData.name}</h2>
+      <p>please click here to <a href="${clientURL}/api/users/reset-password/${token}" target="_blank">Reset Your Password</a> </p>
+      
+    `,
+    };
+
+    //email send with nodemailer
+    try {
+      await emailWithNodeMaier(emailData);
+    } catch (error) {
+      console.error("error sending mail:", error);
+      throw error;
+    }
+
+    return successResponse(res, {
+      statusCode: 200,
+      message: "user reset password  is  successfully by Nahid",
+      payload: token,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+const handleResetPassword = async (req, res, next) => {
+  try {
+    const { token, password } = req.body;
+    const decoded = jwt.verify(token, jwtResetKey);
+    if (!decoded) {
+      throw createError(400, "Invalid token provided in decode response");
+    }
+    const userId = req.params.id;
+    const user = await findWithId(User, userId);
+    const filter = { email: decoded.email };
+    const updates = { password: password };
+    const updateOptions = { new: true };
+    const updatedUser = await User.findOneAndUpdate(
+      filter,
+
+      updates,
+      updateOptions
+    );
+    if (!updatedUser) {
+      throw createError(404, "user password not update successfully");
+    }
+    return successResponse(res, {
+      statusCode: 200,
+      message: "User reset password  successfully by Nahid",
+      payload: {},
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 module.exports = {
   getUsers,
   getUser,
@@ -298,6 +394,9 @@ module.exports = {
   activateUserAccount,
   updateUserById,
   handleBanUserById,
+  handleUpdatePasswordById,
+  handleForgetPassword,
+  handleResetPassword,
 };
 /*
 const deleteUser = async (req, res, next) => {
@@ -335,3 +434,43 @@ const deleteUser = async (req, res, next) => {
     next(error);
   }
 };*/
+//handleResetPassword
+/*
+const jwt = require('jsonwebtoken');
+const createError = require('http-errors');
+
+// Assuming you have the necessary import statements and middleware setup
+
+const handleResetPassword = async (req, res, next) => {
+  try {
+    const { token, password } = req.body;
+    const decoded = jwt.verify(token, jwtResetKey);
+    
+    if (!decoded) {
+      throw createError(400, "Invalid token provided in decode response");
+    }
+    
+    const userId = req.params.id;
+    // Find the user using userId
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      throw createError(404, "User not found");
+    }
+    
+    // Update user's password
+    user.password = password;
+    const updatedUser = await user.save();
+    
+    return res.status(200).json({
+      message: "User reset password successfully by Nahid",
+      payload: updatedUser,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+userRouter.put("/reset-password/:id", handleResetPassword);
+
+*/
