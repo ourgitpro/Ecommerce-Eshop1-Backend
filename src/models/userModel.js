@@ -1,6 +1,6 @@
 const { Schema, model } = require("mongoose");
 const bcrypt = require("bcryptjs");
-const userSchema  = new Schema(
+const userSchema = new Schema(
   {
     name: {
       type: String,
@@ -28,12 +28,12 @@ const userSchema  = new Schema(
       minlength: [6, "User name Min Length"],
       set: (v) => bcrypt.hashSync(v, bcrypt.genSaltSync(10)),
     },
-     image: {
+    image: {
       type: Buffer,
-      contentType:String,
-      required:false,
+      contentType: String,
+      required: false,
     },
-   /* image: {
+    /* image: {
       type: Buffer,
       contentType: String,
       required: true,
@@ -66,5 +66,5 @@ const userSchema  = new Schema(
   },
   { timestamps: true }
 );
-const User = model("Users", userSchema );
+const User = model("Users", userSchema);
 module.exports = User;

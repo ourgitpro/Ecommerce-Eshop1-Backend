@@ -1,3 +1,4 @@
+// categoryModel.js
 const { Schema, model } = require("mongoose");
 
 const categorySchema = new Schema(
@@ -15,21 +16,9 @@ const categorySchema = new Schema(
       trim: true,
       lowercase: true,
     },
-    /* image: {
-      type: Buffer,
-      contentType: String,
-      required: true,
-      validate: [
-        function () {
-          // The `this` context refers to the current document being saved.
-          // If the document is being updated (i.e., not a new document creation) and the image is being set to `null`, bypass the validation.
-          return !(this.isNew && this.image === null);
-        },
-        "User Image Is Required",
-      ],
-    },*/
   },
   { timestamps: true }
 );
-const Category = model("Category", categorySchema);
+
+const Category = model("Categorys", categorySchema);
 module.exports = Category;
