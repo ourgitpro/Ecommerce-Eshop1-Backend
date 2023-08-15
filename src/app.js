@@ -58,6 +58,7 @@ const userRouter = require("./routers/userRouters");
 const authRouter = require("./routers/authRouter");
 const categoryRouter = require("./routers/categoryRouter");
 const seedRouter = require("./routers/seedRouter");
+const productRouter = require("./routers/productRouter");
 const app = express();
 const apiLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 15 minutes
@@ -78,6 +79,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/api/users", userRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/categories", categoryRouter)
+app.use("/api/products", productRouter)
 app.use("/api/seeds", seedRouter);
 app.get("/test", (req, res) => {
   res.status(200).send({

@@ -1,6 +1,13 @@
 const express = require("express");
-const { seedUsers } = require("../controllers/seedController");
+const { seedUsers, seedProducts } = require("../controllers/seedController");
 const seedRouter = express.Router();
+const upload = require("../middlewares/uploadFile");
+seedRouter.get("/users", seedUsers);
+seedRouter.get(
+  "/products",
 
-seedRouter.get('/users',seedUsers)
+  upload.single("image"),
+
+  seedProducts
+);
 module.exports = seedRouter;

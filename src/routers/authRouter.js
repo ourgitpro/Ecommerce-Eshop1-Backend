@@ -7,7 +7,7 @@ const {
   handleRefreshToken,
   handleProtected
 } = require("../controllers/authController.js");
-const { isLoggedIn ,isLoggOut} = require("../middlewares/auth");
+const { isLoggedIn, isLoggOut, isAdmin } = require("../middlewares/auth");
 const authRouter = express.Router();
 authRouter.use(cookieParser()); // Use cookie-parser middleware
 
