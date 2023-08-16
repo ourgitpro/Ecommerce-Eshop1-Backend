@@ -1,5 +1,5 @@
 // categoryModel.js
-const { Schema, model, SchemaType } = require("mongoose");
+const { Schema, model } = require("mongoose");
 
 const productSchema = new Schema(
   {

@@ -23,7 +23,13 @@ module.exports = {
 // categoryController.js
 const createError = require("http-errors");
 const { successResponse } = require("./responseController");
-const { createCategory, getCategories,getSlugCategory,updateCategory,deleteCategory} = require("../services/categoryService");
+const {
+  createCategory,
+  getCategories,
+  getSlugCategory,
+  updateCategory,
+  deleteCategory,
+} = require("../services/categoryService");
 
 const handleCreateCategory = async (req, res, next) => {
   try {
@@ -40,7 +46,6 @@ const handleCreateCategory = async (req, res, next) => {
 };
 const handleGetCategories = async (req, res, next) => {
   try {
-    
     const categories = await getCategories();
     return successResponse(res, {
       statusCode: 200,
@@ -53,7 +58,7 @@ const handleGetCategories = async (req, res, next) => {
 };
 const handleSlugCategory = async (req, res, next) => {
   try {
-    const {slug}= req.params
+    const { slug } = req.params;
     const category = await getSlugCategory(slug);
     return successResponse(res, {
       statusCode: 200,
@@ -66,9 +71,9 @@ const handleSlugCategory = async (req, res, next) => {
 };
 const handleUpdateCategory = async (req, res, next) => {
   try {
-    const {name}= req.body
-    const {slug}= req.params
-    const category = await updateCategory(slug,name);
+    const { name } = req.body;
+    const { slug } = req.params;
+    const category = await updateCategory(slug, name);
     return successResponse(res, {
       statusCode: 200,
       message: "All category show  successfully",
@@ -80,8 +85,7 @@ const handleUpdateCategory = async (req, res, next) => {
 };
 const handleDeleteCategory = async (req, res, next) => {
   try {
-  
-    const {slug}= req.params
+    const { slug } = req.params;
     const category = await deleteCategory(slug);
     return successResponse(res, {
       statusCode: 200,
@@ -97,6 +101,5 @@ module.exports = {
   handleGetCategories,
   handleSlugCategory,
   handleUpdateCategory,
-  handleDeleteCategory
+  handleDeleteCategory,
 };
-
