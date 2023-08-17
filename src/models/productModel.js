@@ -60,12 +60,12 @@ const productSchema = new Schema(
     },
     category: {
       type: Schema.Types.ObjectId,
-      ref: "Category",
+      ref: "Categorys",
       required: true,
     },
   },
   { timestamps: true }
 );
 
-const Product = model("Products", productSchema);
+const Product = model("Product", productSchema);
 module.exports = Product;

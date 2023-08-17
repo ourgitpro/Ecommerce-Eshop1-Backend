@@ -33,7 +33,7 @@ const createCategory = async (name) => {
   }
 };
 const getCategories = async () => {
-  return await Category.find({}).select("name slug").lean();
+  return await Category.find({}).select("name slug");
 };
 const getSlugCategory = async (slug) => {
   return await Category.find({ slug }).select("name slug").lean();
